@@ -52,18 +52,21 @@ st.markdown("""
 Imagine it like chess: every move changes the game state and potential.
 """)
 
-# Visualizing zones
+# Create random demo events for xT visualization
+np.random.seed(42)
+x = np.random.uniform(0, 120, 300)
+y = np.random.uniform(0, 80, 300)
+xt_values = np.random.uniform(0, 0.3, 300)  # synthetic xT values
+
+# Bin and visualize
 pitch = Pitch(pitch_type='statsbomb')
 fig, ax = pitch.draw(figsize=(8, 5))
 
-xT_grid = np.array([
-    [0.00, 0.01, 0.02, 0.03],
-    [0.01, 0.04, 0.08, 0.10],
-    [0.02, 0.06, 0.12, 0.18],
-    [0.03, 0.08, 0.18, 0.30]
-])
-xT_grid = np.kron(xT_grid, np.ones((20, 20)))
-pitch.heatmap(xT_grid, ax=ax, cmap='Reds', alpha=0.6)
+bin_stat = pitch.bin_statistic(
+    x, y, values=xt_values, statistic='mean', bins=(30, 20))
+pitch.heatmap(bin_stat, ax=ax, cmap='Reds', alpha=0.6)
+pitch.scatter(x, y, ax=ax, color='black', s=5, alpha=0.2)
+
 st.pyplot(fig)
 
 # --- Section 3: Upload Your Match Data ---
@@ -95,4 +98,6 @@ st.markdown("""
 - xT Calculation: [Karun Singh’s Blog](https://karun.in/blog/expected-threat.html)
 
 Made by [@jenslaufer](https://github.com/jenslaufer)
+
+© 2025 Jens Laufer — [solytics.de](https://www.solytics.de)
 """)
