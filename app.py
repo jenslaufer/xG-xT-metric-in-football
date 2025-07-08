@@ -27,9 +27,9 @@ def create_football_pitch():
 
 
 def calculate_xg(distance, angle, shot_type="foot", assist_type="none"):
-    """Simplified xG calculation"""
-    # Base probability decreases with distance
-    base_prob = max(0.1, 0.8 - (distance / 30))
+    """Simplified xG calculation - distance in meters"""
+    # Base probability decreases with distance (adjusted for meters)
+    base_prob = max(0.1, 0.8 - (distance / 27))
 
     # Angle modifier (shots from center are better)
     angle_modifier = 1 - abs(angle) / 90
@@ -113,7 +113,7 @@ def main():
         # Simple example
         st.markdown("### Quick Example")
         st.write(
-            "**Scenario:** Player A scores from 6 yards (xG: 0.8), Player B scores from 30 yards (xG: 0.05)")
+            "**Scenario:** Player A scores from 5 meters (xG: 0.8), Player B scores from 27 meters (xG: 0.05)")
         st.write(
             "**Insight:** Player A's goal was expected, Player B's was exceptional!")
 
@@ -145,7 +145,8 @@ def main():
         # xG visualization
         st.markdown("### xG by Distance and Angle")
 
-        distances = np.linspace(5, 35, 50)
+        # Convert to meters (5-32m instead of 5-35 yards)
+        distances = np.linspace(5, 32, 50)
         angles = [0, 15, 30, 45, 60]
 
         # Create data for Altair
@@ -162,7 +163,7 @@ def main():
         chart_df = pl.DataFrame(chart_data)
 
         chart = alt.Chart(chart_df.to_pandas()).mark_line(strokeWidth=3).encode(
-            x=alt.X('Distance:Q', title='Distance from Goal (yards)'),
+            x=alt.X('Distance:Q', title='Distance from Goal (meters)'),
             y=alt.Y('xG:Q', title='xG Probability'),
             color=alt.Color('Angle:N',
                             scale=alt.Scale(range=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'])),
@@ -243,15 +244,14 @@ def main():
             """)
 
     elif page == "Interactive xG Calculator":
-        st.markdown('<h2 class="text-3xl font-bold text-red-600 mb-6">Interactive xG Calculator</h2>',
-                    unsafe_allow_html=True)
+        st.markdown("## Interactive xG Calculator")
 
         st.write("Adjust the parameters below to see how xG changes:")
 
         col1, col2 = st.columns([2, 1])
 
         with col2:
-            distance = st.slider("Distance from goal (yards)", 5, 40, 15)
+            distance = st.slider("Distance from goal (meters)", 5, 35, 15)
             angle = st.slider("Angle from center (degrees)", -60, 60, 0)
             shot_type = st.selectbox("Shot Type",
                                      ["foot", "header", "volley", "penalty"])
@@ -277,9 +277,9 @@ def main():
             # Create pitch with shot position using mplsoccer
             fig, ax = create_football_pitch()
 
-            # Calculate position on pitch (mplsoccer uses 0-100 x, 0-100 y coordinates)
-            # Scale distance to pitch coordinates
-            x_pos = 100 - (distance / 40) * 100
+            # mplsoccer opta coordinates: 1 unit = 1 meter exactly
+            # Goal is at x=100, penalty area at x=83.5 (16.5m from goal)
+            x_pos = 100 - distance  # Direct 1:1 conversion
             y_pos = 50 + (angle / 60) * 30  # Scale angle to pitch width
 
             # Plot shot position with clear visibility
@@ -290,14 +290,13 @@ def main():
             # Simple legend
             ax.legend(loc='upper left', fontsize=12,
                       facecolor='white', edgecolor='black')
-            ax.set_title(f'Shot Position - Distance: {distance}yd, Angle: {angle}°',
+            ax.set_title(f'Shot Position - Distance: {distance}m, Angle: {angle}°',
                          fontsize=14, color='black', fontweight='bold', pad=15)
 
             st.pyplot(fig)
 
     elif page == "xT Heatmap":
-        st.markdown('<h2 class="text-3xl font-bold text-red-600 mb-6">Interactive xT Heatmap</h2>',
-                    unsafe_allow_html=True)
+        st.markdown("## Interactive xT Heatmap")
 
         st.write("Click on the pitch below to see xT values for different positions:")
 
@@ -353,8 +352,7 @@ def main():
             """)
 
     elif page == "Real Examples":
-        st.markdown('<h2 class="text-3xl font-bold text-red-600 mb-6">Real World Examples</h2>',
-                    unsafe_allow_html=True)
+        st.markdown("## Real World Examples")
 
         # Create sample match data using Polars
         match_data = pl.DataFrame({
@@ -432,8 +430,7 @@ def main():
         """)
 
     elif page == "Quiz & Practice":
-        st.markdown('<h2 class="text-3xl font-bold text-red-600 mb-6">Test Your Knowledge</h2>',
-                    unsafe_allow_html=True)
+        st.markdown("## Test Your Knowledge")
 
         # Quiz questions
         st.markdown("### Quiz Questions")
@@ -494,7 +491,7 @@ def main():
         # Practice scenario
         st.markdown("### Practice Scenario")
         st.write("""
-        **Scenario**: A midfielder receives the ball 25 yards from goal, slightly to the right. 
+        **Scenario**: A midfielder receives the ball 23 meters from goal, slightly to the right. 
         They can either:
         - Take a shot (estimated xG: 0.03)
         - Pass to a striker in the penalty area (estimated xG for striker: 0.25)
@@ -503,18 +500,15 @@ def main():
         """)
 
         if st.button("Show Answer"):
-            st.markdown("""
-            <div class="bg-green-50 p-4 rounded-lg border-2 border-green-500 mb-4">
-            <p class="text-green-800 font-semibold">Answer: The pass creates more value!</p>
-            <ul class="text-green-800 mt-2">
-            <li>Shot xG: 0.03</li>
-            <li>Pass leading to shot xG: 0.25</li>
-            <li>The midfielder's xT for the pass would be positive (~0.22)</li>
-            </ul>
-            </div>
-            """, unsafe_allow_html=True)
+            st.success("**Answer**: The pass creates more value!")
+            st.write("""
+            - Shot xG: 0.03
+            - Pass leading to shot xG: 0.25
+            - The midfielder's xT for the pass would be positive (~0.22)
+            """)
 
 
 if __name__ == "__main__":
     # Requirements: streamlit polars numpy altair matplotlib mplsoccer
+    # All distances now use metric system (meters instead of yards)
     main()
