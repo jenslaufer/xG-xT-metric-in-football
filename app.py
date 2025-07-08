@@ -96,8 +96,22 @@ st.header("🔍 Learn More")
 st.markdown("""
 - xG Model Tutorial: [StatsBomb Guide](https://statsbomb.com/articles/soccer/statsbomb-xg-model/)
 - xT Calculation: [Karun Singh’s Blog](https://karun.in/blog/expected-threat.html)
+""")
 
-Made by [@jenslaufer](https://github.com/jenslaufer)
 
-© 2025 Jens Laufer — [solytics.de](https://www.solytics.de)
+# Footer (outside both tabs so it always shows)
+st.markdown("""
+---
+#### Interested in Dev, AI, Modeling, Uncertainty, Decision Support Tools, or Sports Analytics?
+
+This demo was created by Jens Laufer from [Solytics GmbH](https://www.solytics.de) — a team passionate about empowering better decisions under uncertainty.
+
+We specialize in:
+
+- Custom analytics and simulation tools  
+- Forecasting, risk modeling, and decision intelligence  
+- Data-driven product development  
+
+👉 [Visit solytics.de](https://www.solytics.de) — we’d love to hear from you.
+
 """)
