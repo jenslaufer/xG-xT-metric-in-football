@@ -1,5 +1,5 @@
 streamlit>=1.30.0
-pandas>=1.5.0
 matplotlib>=3.5.0
 mplsoccer>=1.2.5
-numpy>=1.21.0
+polars>=0.18.0
+altair>=4.0.0
