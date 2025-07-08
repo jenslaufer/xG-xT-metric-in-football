@@ -3,7 +3,6 @@ version: "3.9"
 services:
   app:
     build: .
-    container_name: app
     ports:
       - "8503:8501"
     environment:
